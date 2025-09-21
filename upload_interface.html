@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kidney Stone Detection - Upload & Analyze</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        
+        .navigation {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .nav-button {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 0 10px;
+            transition: background 0.3s;
+        }
+        
+        .nav-button:hover {
+            background: #2980b9;
+        }
+        
+        .upload-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 3px dashed #3498db;
+            border-radius: 15px;
+            padding: 60px 20px;
+            text-align: center;
+            background: #f8f9fa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        
+        .upload-area:hover {
+            border-color: #2980b9;
+            background: #e9ecef;
+        }
+        
+        .upload-area.dragover {
+            border-color: #27ae60;
+            background: #d5f4e6;
+        }
+        
+        .upload-icon {
+            font-size: 4em;
+            color: #3498db;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.3em;
+            color: #2c3e50;
+            margin-bottom: 10px;
+        }
+        
+        .upload-subtext {
+            color: #7f8c8d;
+            font-size: 1em;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .analyze-button {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(46, 204, 113, 0.3);
+            margin-top: 20px;
+        }
+        
+        .analyze-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 204, 113, 0.4);
+        }
+        
+        .analyze-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .preview-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+            display: none;
+        }
+        
+        .image-preview {
+            max-width: 100%;
+            max-height: 400px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+        }
+        
+        .results-section {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            display: none;
+        }
+        
+        .result-card {
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .result-normal {
+            background: linear-gradient(135deg, #27ae60, #2ecc71);
+            color: white;
+        }
+        
+        .result-stone {
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        .result-uncertain {
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            color: white;
+        }
+        
+        .result-error {
+            background: linear-gradient(135deg, #95a5a6, #7f8c8d);
+            color: white;
+        }
+        
+        .result-title {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .result-confidence {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+        }
+        
+        .result-explanation {
+            font-size: 1em;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #3498db;
+        }
+        
+        .loading-spinner {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #e74c3c;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .info-section {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .info-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .info-section ul {
+            color: #34495e;
+            padding-left: 20px;
+        }
+        
+        .info-section li {
+            margin-bottom: 8px;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .upload-area {
+                padding: 40px 20px;
+            }
+            
+            .upload-icon {
+                font-size: 3em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏥 Kidney Stone Detection</h1>
+            <p>AI-Powered Medical Image Analysis</p>
+        </div>
+        
+        <div class="navigation">
+            <a href="/" class="nav-button">🖼️ Upload & Analyze</a>
+            <a href="/evaluation" class="nav-button">📊 Model Evaluation</a>
+        </div>
+        
+        <div class="info-section">
+            <h3>ℹ️ How to Use This Tool</h3>
+            <ul>
+                <li><strong>Upload Image:</strong> Click the upload area or drag & drop a kidney image (CT scan, ultrasound, or X-ray)</li>
+                <li><strong>Supported Formats:</strong> JPG, PNG, JPEG, BMP, TIFF</li>
+                <li><strong>Analysis:</strong> Our AI model analyzes the image using both deep learning and traditional image processing</li>
+                <li><strong>High Precision:</strong> The system prioritizes accuracy to minimize false positives</li>
+                <li><strong>Results:</strong> Get detailed predictions with confidence scores and explanations</li>
+            </ul>
+        </div>
+        
+        <div class="upload-section">
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">📁</div>
+                <div class="upload-text">Click to upload kidney image</div>
+                <div class="upload-subtext">or drag and drop your image here</div>
+                <input type="file" id="fileInput" class="file-input" accept="image/*">
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="analyzeButton" class="analyze-button" disabled>
+                    🔍 Analyze for Kidney Stones
+                </button>
+            </div>
+        </div>
+        
+        <div class="preview-section" id="previewSection">
+            <h3>📷 Uploaded Image</h3>
+            <img id="imagePreview" class="image-preview" alt="Uploaded image preview">
+        </div>
+        
+        <div class="loading" id="loadingSection" style="display: none;">
+            <div class="loading-spinner"></div>
+            <h3>Analyzing your image...</h3>
+            <p>Please wait while our AI examines the kidney image for stones.</p>
+        </div>
+        
+        <div class="results-section" id="resultsSection">
+            <h3>🩺 Analysis Results</h3>
+            <div id="resultContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        let selectedFile = null;
+        
+        // DOM elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const analyzeButton = document.getElementById('analyzeButton');
+        const previewSection = document.getElementById('previewSection');
+        const imagePreview = document.getElementById('imagePreview');
+        const loadingSection = document.getElementById('loadingSection');
+        const resultsSection = document.getElementById('resultsSection');
+        const resultContent = document.getElementById('resultContent');
+        
+        // File upload handling
+        uploadArea.addEventListener('click', () => fileInput.click());
+        
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelection(files[0]);
+            }
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelection(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelection(file) {
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+            
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                alert('File size too large. Please select an image under 10MB.');
+                return;
+            }
+            
+            selectedFile = file;
+            
+            // Show preview
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                imagePreview.src = e.target.result;
+                previewSection.style.display = 'block';
+                analyzeButton.disabled = false;
+                
+                // Update upload area
+                uploadArea.innerHTML = `
+                    <div class="upload-icon">✅</div>
+                    <div class="upload-text">Image loaded: ${file.name}</div>
+                    <div class="upload-subtext">Click to select a different image</div>
+                `;
+            };
+            reader.readAsDataURL(file);
+        }
+        
+        // Analysis function
+        analyzeButton.addEventListener('click', analyzeImage);
+        
+        async function analyzeImage() {
+            if (!selectedFile) {
+                alert('Please select an image first.');
+                return;
+            }
+            
+            // Show loading
+            loadingSection.style.display = 'block';
+            resultsSection.style.display = 'none';
+            analyzeButton.disabled = true;
+            
+            try {
+                // Prepare form data
+                const formData = new FormData();
+                formData.append('image', selectedFile);
+                
+                // Send request to Flask backend
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server error: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                // Hide loading
+                loadingSection.style.display = 'none';
+                
+                // Show results
+                displayResults(result);
+                
+            } catch (error) {
+                console.error('Error:', error);
+                loadingSection.style.display = 'none';
+                displayError(error.message);
+            } finally {
+                analyzeButton.disabled = false;
+            }
+        }
+        
+        function displayResults(result) {
+            if (result.error) {
+                displayError(result.error);
+                return;
+            }
+            
+            const prediction = result.prediction || 'Unknown';
+            const confidence = result.confidence || 0;
+            const explanation = result.explanation || 'No explanation available';
+            
+            // Determine result class and emoji
+            let resultClass = 'result-normal';
+            let emoji = '✅';
+            let title = 'Normal';
+            
+            if (prediction === 'Stone') {
+                resultClass = 'result-stone';
+                emoji = '⚠️';
+                title = 'Kidney Stone Detected';
+            } else if (prediction === 'Uncertain') {
+                resultClass = 'result-uncertain';
+                emoji = '⚡';
+                title = 'Uncertain Result';
+            } else if (prediction === 'Error') {
+                resultClass = 'result-error';
+                emoji = '❌';
+                title = 'Analysis Error';
+            }
+            
+            resultContent.innerHTML = `
+                <div class="result-card ${resultClass}">
+                    <div class="result-title">${emoji} ${title}</div>
+                    <div class="result-confidence">Confidence: ${(confidence * 100).toFixed(1)}%</div>
+                    <div class="result-explanation">
+                        <strong>Analysis Details:</strong><br>
+                        ${explanation}
+                    </div>
+                </div>
+            `;
+            
+            // Add additional information if available
+            if (result.model_prediction && result.image_analysis) {
+                const additionalInfo = `
+                    <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                        <strong>Technical Details:</strong><br>
+                        • Model Prediction: ${result.model_prediction} (${(result.model_confidence * 100).toFixed(1)}%)<br>
+                        • Image Analysis Confidence: ${(result.image_analysis.confidence * 100).toFixed(1)}%<br>
+                        • Analysis Timestamp: ${new Date(result.timestamp).toLocaleString()}
+                    </div>
+                `;
+                resultContent.querySelector('.result-explanation').innerHTML += additionalInfo;
+            }
+            
+            resultsSection.style.display = 'block';
+            resultsSection.scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function displayError(errorMessage) {
+            resultContent.innerHTML = `
+                <div class="error">
+                    <h3>❌ Analysis Error</h3>
+                    <p>${errorMessage}</p>
+                    <p style="margin-top: 15px; font-size: 0.9em;">
+                        Please try again with a different image or check your connection.
+                    </p>
+                </div>
+            `;
+            resultsSection.style.display = 'block';
+        }
+        
+        // Check server health on page load
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch('/health');
+                const health = await response.json();
+                
+                if (health.status !== 'healthy') {
+                    const warning = document.createElement('div');
+                    warning.className = 'error';
+                    warning.innerHTML = `
+                        <h3>⚠️ Model Not Available</h3>
+                        <p>The AI model is not currently loaded. Analysis functionality may be limited.</p>
+                    `;
+                    document.querySelector('.container').insertBefore(warning, document.querySelector('.upload-section'));
+                }
+            } catch (error) {
+                console.warn('Could not check server health:', error);
+            }
+        });
+    </script>
+</body>
+</html>

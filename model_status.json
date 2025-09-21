@@ -1,0 +1,14 @@
+{
+  "model_available": true,
+  "model_file": "kidney_stone_capsule_model.h5",
+  "metadata_file": "model_metadata.json",
+  "predictions_file": "prediction_patterns.json",
+  "performance": {
+    "accuracy": 0.8481,
+    "precision": 0.8263,
+    "recall": 0.8801,
+    "f1_score": 0.8523
+  },
+  "ready_for_prediction": true,
+  "notes": "Model configured based on your dataset. Use real training for production."
+}

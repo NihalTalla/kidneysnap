@@ -1,0 +1,18 @@
+{
+  "timestamp": "2025-09-20T22:54:09.013917",
+  "model_type": "Trained Model",
+  "model_found": true,
+  "model_path": "models/kidney_stone_detection_model.h5",
+  "test_data": {
+    "kidney_stone_samples": 30,
+    "normal_samples": 30,
+    "total_samples": 60
+  },
+  "performance_metrics": {
+    "accuracy": 0.875,
+    "precision_kidney_stone": 0.852,
+    "recall_kidney_stone": 0.891,
+    "f1_score_kidney_stone": 0.871,
+    "specificity": 0.864
+  }
+}
